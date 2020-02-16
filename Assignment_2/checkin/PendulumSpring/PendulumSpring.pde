@@ -50,7 +50,7 @@ float kv = 160;
 
 void update(float dt){
   //Spring anchor = new Spring(anchorX, anchorY, ballX, ballY,0,1);
-  for (int i = 0; i < Springs.size(); i++) {
+  for (int i = Springs.size() -1; i > -1 ; i--) {
     
     // Anchor Spring
     if (i == 0) {
@@ -110,16 +110,17 @@ void update(float dt){
       float springForceX = (stringF+dampF)*dirX;
       float springForceY = (stringF+dampF)*dirY;
       
-      lowerBall.velX += (springForceX/mass)*dt;
-      lowerBall.velY += ((springForceY+grav)/mass)*dt;
+      lowerBall.velX += (springForceX/mass)*dt/2;
+      lowerBall.velY += ((springForceY+grav)/mass)*dt/2;
       
-      lowerBall.ball_x += lowerBall.velX*dt;
-      lowerBall.ball_y += lowerBall.velY*dt;
+      lowerBall.ball_x += lowerBall.velX*dt/2;
+      lowerBall.ball_y += lowerBall.velY*dt/2;
       
-      upperBall.velX += (springForceX/(2 * mass))*dt;
+      //upperBall.velX += (springForceX/(2 * mass))*dt;
+      upperBall.velX += (springForceX/(mass))*dt * 0.05;
       //upperBall.velY -= ((springForceY+grav)/ (2 * mass))*dt;
       
-      upperBall.ball_x += upperBall.velX*dt;
+      upperBall.ball_x += upperBall.velX*dt/4;
       //upperBall.ball_y += upperBall.velY*dt;
       
       current_Spring.lower_x = lowerBall.ball_x;
@@ -144,21 +145,28 @@ void update(float dt){
       float dirX = sx/stringLen;
       float dirY = sy/stringLen;
       float projVel = lowerBall.velX*dirX + lowerBall.velY*dirY;
-      float dampF = -kv*(projVel - 0);
+      Spring previous_Spring = Springs.get(i-1);
+      float sx_previous = (previous_Spring.lower_x - previous_Spring.upper_x);
+      float sy_previous = (previous_Spring.lower_y - previous_Spring.upper_y);
+      float stringLen_previous = previous_Spring.len();
+      float dirX_previous = sx_previous/stringLen_previous;
+      float dirY_previous = sy_previous/stringLen_previous;
+      float projVel_previous = upperBall.velX*dirX_previous + upperBall.velY*dirY_previous;
+      float dampF = -kv*(projVel - projVel_previous);
       
       float springForceX = (stringF+dampF)*dirX;
       float springForceY = (stringF+dampF)*dirY;
       
-      lowerBall.velX += (springForceX/mass)*dt;
-      lowerBall.velY += ((springForceY+grav * (Balls.size() - i))/mass)*dt;
+      lowerBall.velX += (springForceX/mass)*dt/2;
+      lowerBall.velY += ((springForceY+grav * (Balls.size() - i))/mass)*dt/2;
       
-      lowerBall.ball_x += lowerBall.velX*dt;
-      lowerBall.ball_y += lowerBall.velY*dt;
+      lowerBall.ball_x += lowerBall.velX*dt/2;
+      lowerBall.ball_y += lowerBall.velY*dt/2;
       
-      //upperBall.velX -= (springForceX/mass)*dt * 0.1;
+      upperBall.velX += (springForceX/mass)*dt * 0.05;
       //upperBall.velY -= ((springForceY+grav/mass))*dt * 0.1;
       
-      //upperBall.ball_x += upperBall.velX*dt;
+      upperBall.ball_x += upperBall.velX*dt/4;
       //upperBall.ball_y += upperBall.velY*dt;
       
       current_Spring.lower_x = lowerBall.ball_x;
@@ -186,8 +194,8 @@ void keyPressed() {
 
 void draw() {
   background(255,255,255);
-  for (int i = 0; i < 10; i++){
-    update(1/(10.0*frameRate));
+  for (int i = 0; i < 100; i++){
+    update(1/(100.0*frameRate));
   }
   println(1.0/frameRate);
   
