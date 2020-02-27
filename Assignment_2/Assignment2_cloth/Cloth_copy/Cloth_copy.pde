@@ -21,7 +21,7 @@ void setup() {
   g_cam = new Camera2();
   velocities = new PVector[row_num][column_num];
   positions = new PVector[row_num][column_num];
-  Sphere_pos = new PVector(1200,600,300);
+  Sphere_pos = new PVector(1000,600,300);
   cloth_texture = loadImage("texture.jpeg");
   //textureMode(NORMAL);
   int i = 0;
@@ -145,20 +145,22 @@ void update(float dt){
       velocities = velocities_new;
       
       //Collision Detection
-      PVector dist_vector = PVector.sub(Sphere_pos, positions[i][j]);
-      float dist = sqrt(dist_vector.x * dist_vector.x + dist_vector.y + dist_vector.y + dist_vector.z * dist_vector.z);
+      PVector dist_vector = PVector.sub(positions[i][j], Sphere_pos);
+      float dist = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y + dist_vector.z * dist_vector.z);
       
       
-      //if (dist < Sphere_radius + 0.09) {
-      //  //print("TOUCH!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-      //  PVector normal = PVector.mult(dist_vector, -1);
-      //  normal.normalize();
-      //  float vec_norm = velocities[i][j].dot(normal);
-      //  PVector bounce = normal.mult(vec_norm);
-      //  velocities[i][j] = new PVector(0,0,0);
-      //  positions[i][j].add(normal.mult(3));
+      if (dist < Sphere_radius + 0.09) {
+        //print("TOUCH!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        PVector normal = dist_vector;//PVector.mult(dist_vector, -1); //<>//
+        normal.normalize(); //<>//
+        float vec_norm = velocities[i][j].dot(normal);
+        PVector bounce = normal.mult(-vec_norm*1.5);
+        //velocities[i][j] = new PVector(0,0,0);
+        velocities[i][j].add(bounce);
+        //positions[i][j].add(normal.mult(3));
+        positions[i][j].add(normal.mult(0.1+Sphere_radius-dist));
        
-      //}
+      }
       
       
       
