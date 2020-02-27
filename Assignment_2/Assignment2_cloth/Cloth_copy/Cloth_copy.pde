@@ -7,12 +7,14 @@ PVector[][] velocities;
 PVector[][] positions;
 PVector[][] velocities_new;
 PVector Sphere_pos;
+PVector Sphere_velocity;
+PVector mouse_pressed_pos;
 PImage cloth_texture;
 int g_flags[] = new int[12];
 int column_num = 30;
 int row_num = 30;
 boolean start_update = false;
-
+boolean mouse_dragged = false;
 
 
 void setup() {
@@ -22,6 +24,8 @@ void setup() {
   velocities = new PVector[row_num][column_num];
   positions = new PVector[row_num][column_num];
   Sphere_pos = new PVector(1000,600,300);
+  Sphere_velocity = new PVector(0,0,0);
+  mouse_pressed_pos = new PVector(0,0,0);
   cloth_texture = loadImage("texture.jpeg");
   //textureMode(NORMAL);
   int i = 0;
@@ -36,7 +40,7 @@ void setup() {
   }
   int height = i * 20;
   int width = j * 20;
-  print("height is : " + height + ", width is : " + width);
+  //print("height is : " + height + ", width is : " + width);
   
   
   
@@ -131,36 +135,72 @@ void update(float dt){
       
     }
   }
+  
+  //if (mouse_dragged == true) {
+    
+    
+    
+    
+  //}
 
   
   for (int i = 0; i < row_num; i++) {
     for (int j = 0; j < column_num; j++ ) {
+      
+      if (mousePressed == true & i == 15 && j == 15) {
+        
 
-      if (i == 0) {
-        velocities_new[i][j] = new PVector(0,0);
+          velocities[15][15].x = 0;
+          velocities[15][15].y = 0;
+          velocities[15][15].z = 0;
+          if (mouse_dragged == true) {
+            positions[15][15].x += (mouseX - mouse_pressed_pos.x)/10000;
+            //print("the changing of position should be: " + (mouseX - mouse_pressed_pos.x) + "\n");
+            positions[15][15].y += (mouseY - mouse_pressed_pos.y)/10000;
+          }
+        
+      } else if (mousePressed == true & i == 14 && j == 14) {
+        
+          velocities[14][14].x = 0;
+          velocities[14][14].y = 0;
+          velocities[14][14].z = 0;
+          if (mouse_dragged == true) {
+            positions[14][14].x += (mouseX - mouse_pressed_pos.x)/10000;
+            positions[14][14].y += (mouseY - mouse_pressed_pos.y)/10000;
+          }
+        
+      } else {
+        
+
+        if (i == 0) {
+          velocities_new[i][j] = new PVector(0,0);
+        }
+        positions[i][j].x += velocities_new[i][j].x * dt;
+        positions[i][j].y += velocities_new[i][j].y * dt;
+        positions[i][j].z += velocities_new[i][j].z * dt;
+        velocities = velocities_new;
+        
+        //Collision Detection
+        PVector dist_vector = PVector.sub(positions[i][j], Sphere_pos);
+        float dist = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y + dist_vector.z * dist_vector.z);
+        
+        
+        if (dist < Sphere_radius + 0.09) {
+          //print("TOUCH!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+          PVector normal = dist_vector;//PVector.mult(dist_vector, -1); //<>//
+          normal.normalize(); //<>//
+          float vec_norm = velocities[i][j].dot(normal);
+          PVector bounce = normal.mult(-vec_norm*1.5);
+          //velocities[i][j] = new PVector(0,0,0);
+          velocities[i][j].add(bounce);
+          //positions[i][j].add(normal.mult(3));
+          positions[i][j].add(normal.mult(0.1+Sphere_radius-dist));
+          Sphere_velocity.sub(bounce.mult(0.01));
+         
+        }
       }
-      positions[i][j].x += velocities_new[i][j].x * dt;
-      positions[i][j].y += velocities_new[i][j].y * dt;
-      positions[i][j].z += velocities_new[i][j].z * dt;
-      velocities = velocities_new;
-      
-      //Collision Detection
-      PVector dist_vector = PVector.sub(positions[i][j], Sphere_pos);
-      float dist = sqrt(dist_vector.x * dist_vector.x + dist_vector.y * dist_vector.y + dist_vector.z * dist_vector.z);
       
       
-      if (dist < Sphere_radius + 0.09) {
-        //print("TOUCH!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        PVector normal = dist_vector;//PVector.mult(dist_vector, -1); //<>//
-        normal.normalize(); //<>//
-        float vec_norm = velocities[i][j].dot(normal);
-        PVector bounce = normal.mult(-vec_norm*1.5);
-        //velocities[i][j] = new PVector(0,0,0);
-        velocities[i][j].add(bounce);
-        //positions[i][j].add(normal.mult(3));
-        positions[i][j].add(normal.mult(0.1+Sphere_radius-dist));
-       
-      }
       
       
       
@@ -172,10 +212,10 @@ void update(float dt){
 void keyPressed() {
   if (keyCode == RIGHT) {
     
-    Sphere_pos.x += 10;
+    Sphere_velocity.x += 10;
   }
   if (keyCode == LEFT) {
-    Sphere_pos.x -= 10;
+    Sphere_velocity.x -= 10;
   }
   if (key == ' ') {
     start_update = true;
@@ -192,8 +232,8 @@ void keyPressed() {
   else if (key == 'h') g_flags[4] = -5; // 
   else if (key == 'r') g_flags[5] = -5; // 
   else if (key == 'y') g_flags[5] =  5; // 
-  else if (keyCode == RIGHT) Sphere_pos.x += 10;
-  else if (keyCode == LEFT) Sphere_pos.x -= 10;
+  else if (keyCode == RIGHT) Sphere_velocity.x += 10;
+  else if (keyCode == LEFT) Sphere_velocity.x -= 10;
 }
 
 void keyReleased() {
@@ -203,6 +243,26 @@ void keyReleased() {
   else if (key == 't' || key == 'g') { g_flags[3] = 0; }
   else if (key == 'f' || key == 'h') { g_flags[4] = 0; }
   else if (key == 'r' || key == 'y') { g_flags[5] = 0; }
+}
+
+void mouseDragged() {
+  //print("mouseX is: " + mouseX + ", mouseY is: " + mouseY + "------------\n");
+  mouse_dragged = true;
+  //print("mouse is dragged!" + mouse_dragged + "\n");
+}
+
+void mouseReleased() {
+  
+  mouse_dragged = false;
+  //print("mouse is released!" + mouse_dragged + "\n");
+  
+}
+
+void mousePressed() {
+  
+  mouse_pressed_pos.x = mouseX;
+  mouse_pressed_pos.y = mouseY;
+  
 }
 
 void draw() {
@@ -237,25 +297,13 @@ void draw() {
     for (int j = 0; j < column_num; j++) {
       vertex(positions[i+1][j].x, positions[i+1][j].y, positions[i+1][j].z,(i+1) * grid_height, j * grid_width);
       vertex(positions[i][j].x, positions[i][j].y, positions[i][j].z, i * grid_height, j * grid_width);
-      //print("the column: " + (i+1)  + ", the row: " + j + "--------\n");
-      //print("the column: " + i + ", the row: " + j + "--------\n");
     }
-    //vertex(positions[1][0].x, positions[1][0].y, positions[1][0].z,600, 0);
-    //vertex(positions[0][0].x, positions[0][0].y, positions[0][0].z, 0, 0);
-    //vertex(positions[1][1].x, positions[1][1].y, positions[1][1].z,600, 600);
-    //vertex(positions[0][1].x, positions[0][1].y, positions[0][1].z, 0, 600);
     endShape();
   }
-  //beginShape(QUADS);
-  //texture(cloth_texture);
-  //vertex(600,0,0,0,0);
-  //vertex(600,0,600,0, 600);
-  //vertex(1200,0,600,600,600);
-  //vertex(1200,0,0,600,0);
-  //endShape();
+
   
   pushMatrix();
-  translate(Sphere_pos.x, Sphere_pos.y, Sphere_pos.z);
+  translate(Sphere_pos.x + Sphere_velocity.x, Sphere_pos.y + Sphere_velocity.y, Sphere_pos.z + Sphere_velocity.z);
   //noStroke();
   fill(255,0,0);
   sphere(Sphere_radius);
