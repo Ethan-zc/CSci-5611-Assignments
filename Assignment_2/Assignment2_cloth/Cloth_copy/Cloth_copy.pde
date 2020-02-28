@@ -369,7 +369,7 @@ void draw() {
 
   pushMatrix();
   translate(Sphere_pos.x, Sphere_pos.y + Sphere_velocity.y, Sphere_pos.z);
-  //noStroke();
+  noStroke();
   fill(255,0,0);
   //spotLight(255, 255, 255, width/2, height/2, 0, 0, 0, -1, PI/4, 2);
   sphere(Sphere_radius);
