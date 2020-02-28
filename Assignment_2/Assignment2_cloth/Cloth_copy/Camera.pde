@@ -8,7 +8,7 @@ class Camera2 implements MyCamera {
   float azimuth,   
         elevation; 
   Camera2() { 
-    pos = new PVector(800, 0, 1000);
+    pos = new PVector(900, 300, 1500);
     azimuth = PI/2; elevation = 0;
   }
   void Apply() {
